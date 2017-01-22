@@ -9,14 +9,26 @@ from PIL import Image
 
 import numpy as np
 import csv
+import sys
+import os
 
-with open('driving_log.csv', 'r') as csvfile:
+args = len(sys.argv)
+if args < 2 :
+	print("Provide the data directory")
+	quit()
+
+basedir = sys.argv[1]
+log_file = os.path.join(basedir, 'driving_log.csv')
+
+with open(log_file, 'r') as csvfile:
 	reader = csv.reader(csvfile)
 	data = np.array(list(reader))
 	
 # Load data
 X_input = data[:,0]
 y_train = np.array(data[:,3], dtype="float32")
+
+print("Proportion of nonzero values: %s" % (np.count_nonzero(y_train) / len(y_train)))
 
 X_train = []
 for imageName in X_input:
@@ -26,10 +38,6 @@ for imageName in X_input:
 # img.show()
 
 X_train = np.array(X_train)
-print(np.shape(X_train))
-print(np.shape(y_train))
-print(np.max(y_train))
-print(np.min(y_train))
 
 ch, row, col = 3, 320, 160
 
