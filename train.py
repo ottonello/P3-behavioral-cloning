@@ -100,7 +100,7 @@ X_train = np.array(X_train)
 datagen = ImageDataGenerator(horizontal_flip=False)
 #datagen.fit(X_train)
 
-model = nv()
+model = basic()
 model.compile(loss='mean_squared_error', optimizer=Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0))
 
 model.fit_generator(datagen.flow(X_train, y_train, batch_size=256), samples_per_epoch=len(X_train), nb_epoch=10)
