@@ -104,7 +104,6 @@ model = basic()
 model.compile(loss='mean_squared_error', optimizer=Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0))
 
 model.fit_generator(datagen.flow(X_train, y_train, batch_size=256), samples_per_epoch=len(X_train), nb_epoch=10)
-
 # print(history.history['acc'][-1])
 #loss_and_metrics = model.evaluate(X_test, Y_test, batch_size=32)
 model.save('model.h5')
@@ -113,4 +112,4 @@ model_json = model.to_json()
 with open("model.json", "w") as json_file:
     json_file.write(model_json)
 
-import gc; gc.collect()
+mport gc; gc.collect()
