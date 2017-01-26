@@ -2,8 +2,8 @@ from keras.optimizers import Adam
 from models import basic, nv
 from generators import data_generator
 
-learning_rate = 1e-3
-number_of_epochs = 8
+learning_rate = 1e-4
+number_of_epochs = 5
 batch_size = 128
 number_of_samples_per_epoch = 25600
 number_of_validation_samples = 5120
