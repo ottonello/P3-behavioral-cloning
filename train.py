@@ -4,7 +4,7 @@ from generators import data_generator
 
 learning_rate = 1e-3
 number_of_epochs = 8
-batch_size = 256
+batch_size = 128
 number_of_samples_per_epoch = 25600
 number_of_validation_samples = 5120
 
@@ -16,7 +16,7 @@ DATA_DIR = "udacity"
 print("Dataset:", DATA_DIR)
 
 # construct the selected model
-model = basic()
+model = nv()
 model.summary()
 model.compile(loss='mean_squared_error', optimizer=Adam(lr=learning_rate))
 

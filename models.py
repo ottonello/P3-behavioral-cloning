@@ -4,7 +4,7 @@ from keras.layers import Convolution2D, ZeroPadding2D, MaxPooling2D
 from keras.layers.core import Lambda
 from keras.layers.advanced_activations import ELU
 
-ch, row, col = 3, 320, 160
+ch, row, col = 3, 64, 64
 
 def basic():
     model = Sequential()
