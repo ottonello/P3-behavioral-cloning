@@ -61,16 +61,67 @@ def nv():
     model.add(MaxPooling2D(pool_size=(2, 2), strides=(1, 1)))
     
     model.add(Flatten())
-    # model.add(Dropout(.2))
+    model.add(Dropout(.2))
+    model.add(Activation('relu'))
+    model.add(Dense(1164))
+    model.add(Dropout(.5))
     model.add(Activation('relu'))
     model.add(Dense(100))
-    # model.add(Dropout(.5))
+    model.add(Dropout(.5))
     model.add(Activation('relu'))
     model.add(Dense(50))
-    # model.add(Dropout(.5))
+    model.add(Dropout(.5))
     model.add(Activation('relu'))
     model.add(Dense(10))
-    # model.add(Dropout(.5))
+    model.add(Dropout(.5))
     model.add(Activation('relu'))
+    model.add(Dense(1))
+    return model
+
+def test():
+    activation_relu = 'relu'
+
+    # Our model is based on NVIDIA's "End to End Learning for Self-Driving Cars" paper
+    # Source:  https://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf
+    model = Sequential()
+
+    model.add(Lambda(lambda x: x / 127.5 - 1.0, input_shape=(64, 64, 3)))
+
+    # starts with five convolutional and maxpooling layers
+    model.add(Convolution2D(24, 5, 5, border_mode='same', subsample=(2, 2)))
+    model.add(Activation(activation_relu))
+    model.add(MaxPooling2D(pool_size=(2, 2), strides=(1, 1)))
+
+    model.add(Convolution2D(36, 5, 5, border_mode='same', subsample=(2, 2)))
+    model.add(Activation(activation_relu))
+    model.add(MaxPooling2D(pool_size=(2, 2), strides=(1, 1)))
+
+    model.add(Convolution2D(48, 5, 5, border_mode='same', subsample=(2, 2)))
+    model.add(Activation(activation_relu))
+    model.add(MaxPooling2D(pool_size=(2, 2), strides=(1, 1)))
+
+    model.add(Convolution2D(64, 3, 3, border_mode='same', subsample=(1, 1)))
+    model.add(Activation(activation_relu))
+    model.add(MaxPooling2D(pool_size=(2, 2), strides=(1, 1)))
+
+    model.add(Convolution2D(64, 3, 3, border_mode='same', subsample=(1, 1)))
+    model.add(Activation(activation_relu))
+    model.add(MaxPooling2D(pool_size=(2, 2), strides=(1, 1)))
+
+    model.add(Flatten())
+
+    # Next, five fully connected layers
+    model.add(Dense(1164))
+    model.add(Activation(activation_relu))
+
+    model.add(Dense(100))
+    model.add(Activation(activation_relu))
+
+    model.add(Dense(50))
+    model.add(Activation(activation_relu))
+
+    model.add(Dense(10))
+    model.add(Activation(activation_relu))
+
     model.add(Dense(1))
     return model

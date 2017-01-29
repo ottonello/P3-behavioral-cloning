@@ -11,7 +11,7 @@ from PIL import Image
 from PIL import ImageOps
 from flask import Flask, render_template
 from io import BytesIO
-from generators import crop, resize
+from generators import crop, resize, random_crop
 from keras.models import model_from_json
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array
 
@@ -37,14 +37,15 @@ def telemetry(sid, data):
     imgString = data["image"]
     image = Image.open(BytesIO(base64.b64decode(imgString)))
     image_array = np.asarray(image)
-    image_array = crop(image_array, .35, 0.1)
-    image_array = resize(image_array, (64, 64))
+    # image_array = crop(image_array, .35, 0.1)
+    # image_array = resize(image_array, (64, 64))
+    image_array,_ = random_crop(image_array,rand=False)
     transformed_image_array = image_array[None, :, :, :]
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
     steering_angle = float(model.predict(transformed_image_array, batch_size=1))
     # The driving model currently just outputs a constant throttle. Feel free to edit this.
     throttle = 0.3
-    print(steering_angle, throttle)
+    # print(steering_angle, throttle)
     send_control(steering_angle, throttle)
 
 

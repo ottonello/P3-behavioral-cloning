@@ -1,18 +1,18 @@
 import cv2
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 import scipy.misc
 from scipy.ndimage import rotate
 from scipy.stats import bernoulli
-from PIL import Image
-import os
-import numpy as np
-import pandas as pd
 
 # Some useful constants
-DRIVING_LOG_FILE = 'driving_log.csv'
-# Taken from https://github.com/upul/behavioral_cloning
-STEERING_COEFFICIENT = 0.229
-COLUMNS = ['center','left','right','steering','throttle','brake','speed']
+DRIVING_LOG_FILE = './udacity/driving_log.csv'
+IMG_PATH = './udacity/'
+
+offset=1.0 
+dist=10.0
+STEERING_COEFFICIENT = offset/dist * 360/( 2*np.pi)  / 25.0
 
 def crop(image, top_percent, bottom_percent):
     """
@@ -81,7 +81,7 @@ def random_gamma(image):
     return cv2.LUT(image, table)
 
 
-def random_shear(image, steering_angle, shear_range=200):
+def random_shear(image, steering_angle, shear_range=150):
     """
     Source: https://medium.com/@ksakmann/behavioral-cloning-make-a-car-drive-like-yourself-dc6021152713#.7k8vfppvk
     :param image:
@@ -106,6 +106,63 @@ def random_shear(image, steering_angle, shear_range=200):
     return image, steering_angle
 
 
+def random_rotation(image, steering_angle, rotation_amount=15):
+    """
+    :param image:
+    :param steering_angle:
+    :param rotation_amount:
+    :return:
+    """
+    angle = np.random.uniform(-rotation_amount, rotation_amount + 1)
+    rad = (np.pi / 180.0) * angle
+    return rotate(image, angle, reshape=False), steering_angle + (-1) * rad
+
+
+def min_max(data, a=-0.5, b=0.5):
+    """
+    :param data:
+    :param a:
+    :param b:
+    :return:
+    """
+    data_max = np.max(data)
+    data_min = np.min(data)
+    return a + (b - a) * ((data - data_min) / (data_max - data_min))
+
+
+def random_crop(image,steering=0.0,tx_lower=-20,tx_upper=20,ty_lower=-2,ty_upper=2,rand=True):
+    # we will randomly crop subsections of the image and use them as our data set.
+    # also the input to the network will need to be cropped, but of course not randomly and centered.
+    shape = image.shape
+    col_start,col_end =abs(tx_lower),shape[1]-tx_upper
+    horizon=60;
+    bonnet=136
+    if rand:
+        tx= np.random.randint(tx_lower,tx_upper+1)
+        ty= np.random.randint(ty_lower,ty_upper+1)
+    else:
+        tx,ty=0,0
+    
+    #    print('tx = ',tx,'ty = ',ty)
+    random_crop = image[horizon+ty:bonnet+ty,col_start+tx:col_end+tx,:]
+    image = cv2.resize(random_crop,(64,64),cv2.INTER_AREA)
+    # the steering variable needs to be updated to counteract the shift 
+    if tx_lower != tx_upper:
+        dsteering = -tx/(tx_upper-tx_lower)/3.0
+    else:
+        dsteering = 0
+    steering += dsteering
+    
+    return image,steering
+
+
+def random_brightness(image):
+    image1 = cv2.cvtColor(image,cv2.COLOR_RGB2HSV)
+    random_bright = 0.8 + 0.4*(2*np.random.uniform()-1.0)    
+    image1[:,:,2] = image1[:,:,2]*random_bright
+    image1 = cv2.cvtColor(image1,cv2.COLOR_HSV2RGB)
+    return image1
+
 def generate_new_image(image, steering_angle, top_crop_percent=0.35, bottom_crop_percent=0.1,
                        resize_dim=(64, 64), do_shear_prob=0.9):
     """
@@ -122,62 +179,72 @@ def generate_new_image(image, steering_angle, top_crop_percent=0.35, bottom_crop
     if head == 1:
         image, steering_angle = random_shear(image, steering_angle)
 
-    image = crop(image, top_crop_percent, bottom_crop_percent)
+    # image = crop(image, top_crop_percent, bottom_crop_percent)
+    image, steering_angle = random_crop(image, steering_angle,tx_lower=-20,tx_upper=20,ty_lower=-10,ty_upper=10)
 
     image, steering_angle = random_flip(image, steering_angle)
 
-    image = random_gamma(image)
+    # image = random_gamma(image)
 
-    image = resize(image, resize_dim)
+    image = random_brightness(image)
+
+    # image = resize(image, resize_dim)
 
     return image, steering_angle
 
 
-# center,left,right,steering,throttle,brake,speed
-def get_random_camera_data(csv, index):
-    """Get one of the left, center or right images together with
-    the corresponding(adjusted) steering angle.
+def get_next_image_files(batch_size=64):
     """
-    rnd = np.random.randint(0, 3)
-    img = csv.iloc[index][COLUMNS.index('center') + rnd].strip()
-    angle = csv.iloc[index][COLUMNS.index('steering')]
-    
-    # Adjust steering based on camera position
-    if COLUMNS.index('center') + rnd == COLUMNS.index('left'):
-        angle = angle + STEERING_COEFFICIENT
-    elif rnd == COLUMNS.index('right'):
-        angle = angle - STEERING_COEFFICIENT
+    The simulator records three images (namely: left, center, and right) at a given time
+    However, when we are picking images for training we randomly (with equal probability)
+    one of these three images and its steering angle.
+    :param batch_size:
+        Size of the image batch
+    :return:
+        An list of selected (image files names, respective steering angles)
+    """
+    data = pd.read_csv(DRIVING_LOG_FILE)
+    num_of_img = len(data)
+    rnd_indices = np.random.randint(0, num_of_img, batch_size)
 
-    return (img, angle)
+    image_files_and_angles = []
+    for index in rnd_indices:
+        rnd_image = np.random.randint(0, 3)
+        if rnd_image == 0:
+            img = data.iloc[index]['left'].strip()
+            angle = data.iloc[index]['steering'] + STEERING_COEFFICIENT
+            image_files_and_angles.append((img, angle))
+
+        elif rnd_image == 1:
+            img = data.iloc[index]['center'].strip()
+            angle = data.iloc[index]['steering']
+            image_files_and_angles.append((img, angle))
+        else:
+            img = data.iloc[index]['right'].strip()
+            angle = data.iloc[index]['steering'] - STEERING_COEFFICIENT
+            image_files_and_angles.append((img, angle))
+
+    return image_files_and_angles
 
 
-def next_batch(base_dir, batch_size=64):
-    log_file = os.path.join(base_dir, DRIVING_LOG_FILE)
-    csv = pd.read_csv(log_file)
-    # Get a random batch of data rows
-    random_rows = np.random.randint(0, len(csv), batch_size)
-    
-    batch = []
-    for index in random_rows:
-        data = get_random_camera_data(csv, index)
-        batch.append(data)
-
-    return batch
-
-def data_generator(base_dir, batch_size=64):
+def generate_next_batch(batch_size=64):
+    """
+    This generator yields the next training batch
+    :param batch_size:
+        Number of training images in a single batch
+    :return:
+        A tuple of features and steering angles as two numpy arrays
+    """
     while True:
         X_batch = []
         y_batch = []
-        images = next_batch(base_dir, batch_size)
+        images = get_next_image_files(batch_size)
         for img_file, angle in images:
-            img_file = os.path.join(base_dir, img_file)
-            raw_image = plt.imread(img_file)
+            raw_image = plt.imread(IMG_PATH + img_file)
             raw_angle = angle
-            augmented_image, augmented_angle = generate_new_image(raw_image, raw_angle)
-
-            X_batch.append(np.array(augmented_image))
-            y_batch.append(augmented_angle)
-
+            new_image, new_angle = generate_new_image(raw_image, raw_angle)
+            X_batch.append(new_image)
+            y_batch.append(new_angle)
 
         assert len(X_batch) == batch_size, 'len(X_batch) == batch_size should be True'
 
