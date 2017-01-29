@@ -2,6 +2,7 @@ import errno
 import json
 import os
 
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -9,10 +10,15 @@ import pandas as pd
 # Some useful constants
 DRIVING_LOG_FILE = 'driving_log.csv'
 # Taken from https://github.com/upul/behavioral_cloning
-STEERING_COEFFICIENT = 0.229
+# STEERING_COEFFICIENT = 0.229
+offset=1.0 
+dist=20.0
+dsteering = offset/dist * 360/( 2*np.pi) / 25.0
+
 COLUMNS = ['center','left','right','steering','throttle','brake','speed']
 
-# TODO: actual augmentation
+RESIZE_W = 64
+RESIZE_H = 64
 
 # center,left,right,steering,throttle,brake,speed
 def get_random_camera_data(csv, index):
@@ -24,13 +30,28 @@ def get_random_camera_data(csv, index):
     angle = csv.iloc[index][COLUMNS.index('steering')]
     
     # Adjust steering based on camera position
-    if COLUMNS.index('center') + rnd == COLUMNS.index('left'):
-        angle = angle + STEERING_COEFFICIENT
+    if rnd == COLUMNS.index('left'):
+        angle = angle + dsteering
     elif rnd == COLUMNS.index('right'):
-        angle = angle - STEERING_COEFFICIENT
+        angle = angle - dsteering
 
     return (img, angle)
 
+def resize(image):
+    return cv2.resize(image, dsize=(RESIZE_W, RESIZE_H))
+
+def random_flip(image, steering_angle, flip_probability = 0.5):
+    coin_toss = np.random.choice(2, p=[1-flip_probability, flip_probability])
+    if coin_toss:
+        flipped = cv2.flip(image, 1)
+        return (flipped,  (-1) * steering_angle)
+    else:
+        return (image,  steering_angle)
+
+def preprocess(image, steering_angle):
+    image = resize(image)
+    image, steering_angle = random_flip(image, steering_angle)
+    return (image, steering_angle)
 
 def next_batch(base_dir, batch_size=64):
     log_file = os.path.join(base_dir, DRIVING_LOG_FILE)
@@ -55,8 +76,9 @@ def data_generator(base_dir, batch_size=64):
             img_file = os.path.join(base_dir, img_file)
             raw_image = plt.imread(img_file)
             raw_angle = angle
-            X_batch.append(raw_image)
-            y_batch.append(raw_angle)
+            processed_image, processed_angle = preprocess(raw_image, raw_angle)
+            X_batch.append(processed_image)
+            y_batch.append(processed_angle)
 
         assert len(X_batch) == batch_size, 'len(X_batch) == batch_size should be True'
 
