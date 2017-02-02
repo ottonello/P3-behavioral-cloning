@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy.misc
+import random
 from scipy.ndimage import rotate
 from scipy.stats import bernoulli
 
@@ -81,7 +82,45 @@ def random_gamma(image):
     return cv2.LUT(image, table)
 
 
-def random_shear(image, steering_angle, shear_range=150):
+# Generate a random triangular shade on the image
+# area parameter is a percentage of the total image area
+def random_shades(image, area=0.1):
+    # Generate a separate buffer
+    shadows = image.copy()
+
+    image_area = shadows.shape[0] * shadows.shape[1]
+    # print("Area: %f" % image_area)
+    shadow_area = area * image_area
+    # print("Shadow area: %f" % shadow_area)
+    poly = get_triangle(shadow_area, shadows.shape[0], shadows.shape[1])
+    # print(poly)
+    cv2.fillPoly(shadows, np.array([poly]), -1)
+
+    alpha = .6
+    return cv2.addWeighted(shadows, alpha, image, 1-alpha,0,image)
+
+def get_triangle(area, max_x, max_y):
+    # choose
+    # print("Triangle max_x: %d max_y: %d, area %f" % (max_x, max_y,area) )
+    # Get a random point within the constraints
+    x1 = random.randint(0, max_x)
+    y1 = random.randint(0, max_y)
+    # Get some other random point within the constraints,
+    x2 = random.randint(0, max_x)
+    y2 = random.randint(0, max_y)
+    # Get some other point, making sure the area now 
+    n = 2 * area - x1 * y2 + x2 * y1
+    m = y1 - x1
+    p = x2 - y2
+    # print("n = %f, m = %f, p = %f"% (n,m,p))
+    max_y3 = int(n/m) if m != 0 else int(n)
+    y3 = random.randint(0, abs(max_y3))
+    # print("y3 = %f"% y3)
+    max_x3 = int(n/p - m * y3) if p != 0 else int(n)
+    x3 = random.randint(0, abs(max_x3))
+    return [[x1,y1],[x2,y2],[x3,y3]]
+
+def random_shear(image, steering_angle, shear_range=200):
     """
     Source: https://medium.com/@ksakmann/behavioral-cloning-make-a-car-drive-like-yourself-dc6021152713#.7k8vfppvk
     :param image:
@@ -175,6 +214,8 @@ def generate_new_image(image, steering_angle, top_crop_percent=0.35, bottom_crop
     :param shear_range:
     :return:
     """
+
+    image = random_shades(image)
     head = bernoulli.rvs(do_shear_prob)
     if head == 1:
         image, steering_angle = random_shear(image, steering_angle)

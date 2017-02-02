@@ -3,7 +3,7 @@ from models import basic, nv, test
 from generators import generate_next_batch
 
 learning_rate = 1e-4
-number_of_epochs = 10
+number_of_epochs = 7
 batch_size = 64
 number_of_samples_per_epoch = 20032
 number_of_validation_samples = 6400

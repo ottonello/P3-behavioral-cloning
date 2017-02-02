@@ -1,13 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from generators import data_generator
+from generators import generate_next_batch
 from PIL import Image
 
 def main():
-	gen = data_generator('g27', batch_size=10000)
+	gen = generate_next_batch(batch_size=10)
 	imgs, angles = next(gen)
 
-	show_images = False
+	show_images = True
 	if show_images:
 		for img, angle in zip(imgs,angles):
 			print(angle)
