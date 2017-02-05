@@ -1,19 +1,16 @@
 from keras.optimizers import Adam
 from models import basic, nv, test
 from generators import generate_next_batch
+from keras import backend as K
 
 learning_rate = 1e-4
 number_of_epochs = 7
 batch_size = 64
 number_of_samples_per_epoch = 20032
-number_of_validation_samples = 6400
+number_of_validation_samples = 640
 
 OUTPUT_MODEL_FILE = "model.json"
 OUTPUT_WEIGHTS_FILE = "model.h5"
-
-DATA_DIR = "udacity"
-
-print("Dataset:", DATA_DIR)
 
 # construct the selected model
 model = nv()
@@ -36,5 +33,4 @@ with open(OUTPUT_MODEL_FILE, "w") as json_file:
     json_file.write(model_json)
 model.save(OUTPUT_WEIGHTS_FILE)
 
-import gc
-gc.collect()
+K.clear_session()

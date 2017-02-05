@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from generators import generate_next_batch
 from PIL import Image
+from datetime import datetime
 
 def main():
 	gen = generate_next_batch(batch_size=10)
@@ -15,7 +16,9 @@ def main():
 			input("Press Enter to continue...")
 
 	plt.hist(angles, bins='auto')  # plt.hist passes it's arguments to np.histogram
-	plt.show()
+	filename = 'output-%s.png' % datetime.now()
+	plt.savefig(filename)
+	print("Histogram saved to:", filename)
 
 if __name__ == "__main__":
     main()
