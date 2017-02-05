@@ -179,9 +179,7 @@ def next_batch(csv, batch_size=64):
 
     return batch
 
-def generate_next_batch(batch_size=64):
-    csv = pd.read_csv(DRIVING_LOG_FILE)
-
+def generate_next_batch(csv, batch_size=64):
     while True:
         X_batch = []
         y_batch = []
