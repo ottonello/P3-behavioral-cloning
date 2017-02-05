@@ -168,8 +168,7 @@ def get_random_camera_data(csv, index):
 
     return (img, angle)
 
-def next_batch(batch_size=64):
-    csv = pd.read_csv(DRIVING_LOG_FILE)
+def next_batch(csv, batch_size=64):
     # Get a random batch of data rows
     random_rows = np.random.randint(0, len(csv), batch_size)
     
@@ -181,17 +180,12 @@ def next_batch(batch_size=64):
     return batch
 
 def generate_next_batch(batch_size=64):
-    """
-    This generator yields the next training batch
-    :param batch_size:
-        Number of training images in a single batch
-    :return:
-        A tuple of features and steering angles as two numpy arrays
-    """
+    csv = pd.read_csv(DRIVING_LOG_FILE)
+
     while True:
         X_batch = []
         y_batch = []
-        images = next_batch(batch_size)
+        images = next_batch(csv, batch_size)
         for img_file, angle in images:
             raw_image = plt.imread(img_file)
             raw_angle = angle
