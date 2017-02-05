@@ -4,7 +4,7 @@ from generators import generate_next_batch
 from keras import backend as K
 
 learning_rate = 1e-4
-number_of_epochs = 7
+number_of_epochs = 11
 batch_size = 64
 number_of_samples_per_epoch = 20032
 number_of_validation_samples = 640
@@ -13,7 +13,7 @@ OUTPUT_MODEL_FILE = "model.json"
 OUTPUT_WEIGHTS_FILE = "model.h5"
 
 # construct the selected model
-model = nv()
+model = basic()
 model.summary()
 model.compile(loss='mean_squared_error', optimizer=Adam(lr=learning_rate))
 
