@@ -1,11 +1,17 @@
-import numpy as np
-import matplotlib.pyplot as plt
 from generators import generate_next_batch
 from PIL import Image
 from datetime import datetime
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+DATA_PATH='./udacity'
+DRIVING_LOG_FILE = DATA_PATH + '/driving_log.csv'
 
 def main():
-	gen = generate_next_batch(batch_size=10)
+	csv = pd.read_csv(DRIVING_LOG_FILE)
+	
+	gen = generate_next_batch(csv, batch_size=10)
 	imgs, angles = next(gen)
 
 	show_images = True

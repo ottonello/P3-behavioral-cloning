@@ -19,14 +19,17 @@ OUTPUT_WEIGHTS_FILE = "model.h5"
 
 # Training parameters
 learning_rate = 1e-4
-number_of_epochs = 11
+number_of_epochs = 7
 batch_size = 64
 number_of_samples_per_epoch = 20032
 validation_split = 0.3
 
+# Images size
+resize_x=64
+resize_y=64
 
 # Input layer shape
-ch, row, col = 3, 64, 64
+ch, row, col = 3, resize_x, resize_y
 
 def basic():
     model = Sequential()
@@ -75,12 +78,14 @@ def split(csv, val_split):
 csv = pd.read_csv(DRIVING_LOG_FILE)
 train_data, val_data = split(csv, validation_split)
 number_of_validation_samples = len(val_data)
+
+print("Log File:", DRIVING_LOG_FILE)
 print("Total samples: ", len(csv))
 print("Training size: ", len(train_data))
 print("Validation size: ", number_of_validation_samples)
 
-train_gen = generate_next_batch(train_data)
-validation_gen = generate_next_batch(val_data)
+train_gen = generate_next_batch(train_data, resize_dim=(resize_x, resize_y))
+validation_gen = generate_next_batch(val_data, resize_dim=(resize_x, resize_y))
 
 history = model.fit_generator(train_gen,
                   samples_per_epoch=number_of_samples_per_epoch,

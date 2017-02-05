@@ -1,25 +1,19 @@
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 import scipy.misc
 import random
 import os
 from scipy.ndimage import rotate
 from scipy.stats import bernoulli
 
-# Some useful constants
-DATA_PATH='./udacity'
-DRIVING_LOG_FILE = DATA_PATH + '/driving_log.csv'
+# CSV column names
 COLUMNS = ['center','left','right','steering','throttle','brake','speed']
 
-print("Log File:", DRIVING_LOG_FILE)
-
+# Parameters to calculate the steering correction when taking left/right cameras
 offset=1.0
 dist=10.0
 STEERING_COEFFICIENT = offset/dist * 360/( 2*np.pi)  / 25.0
-resize_dim=(64,64)
-print("Steering coeff=",STEERING_COEFFICIENT)
 
 def random_flip(image, steering_angle, flipping_prob=0.5):
     """
@@ -97,7 +91,7 @@ def random_shear(image, steering_angle, shear_range=200):
 
     return image, steering_angle
 
-def random_crop(image,steering=0.0,tx_lower=-20,tx_upper=20,ty_lower=-2,ty_upper=2,rand=True):
+def random_crop(image,resize_dim,steering=0.0,tx_lower=-20,tx_upper=20,ty_lower=-10,ty_upper=10,rand=True):
     # we will randomly crop subsections of the image and use them as our data set.
     # also the input to the network will need to be cropped, but of course not randomly and centered.
     shape = image.shape
@@ -110,7 +104,6 @@ def random_crop(image,steering=0.0,tx_lower=-20,tx_upper=20,ty_lower=-2,ty_upper
     else:
         tx,ty=0,0
     
-    #    print('tx = ',tx,'ty = ',ty)
     random_crop = image[horizon+ty:bonnet+ty,col_start+tx:col_end+tx,:]
     image = cv2.resize(random_crop,resize_dim,cv2.INTER_AREA)
     # the steering variable needs to be updated to counteract the shift 
@@ -122,28 +115,32 @@ def random_crop(image,steering=0.0,tx_lower=-20,tx_upper=20,ty_lower=-2,ty_upper
     
     return image,steering
 
-def random_brightness(image):
-    image1 = cv2.cvtColor(image,cv2.COLOR_RGB2HSV)
-    random_bright = 0.8 + 0.4*(2*np.random.uniform()-1.0)    
-    image1[:,:,2] = image1[:,:,2]*random_bright
-    image1 = cv2.cvtColor(image1,cv2.COLOR_HSV2RGB)
-    return image1
-
-def generate_new_image(image, steering_angle, do_shear_prob=0.9):
+def random_brightness(image, median=0.8, dev=0.4):
     """
-    :param image:
-    :param steering_angle:
-    :param do_shear_prob:
-    :param shear_range:
-    :return:
+    Source: http://stackoverflow.com/questions/32609098/how-to-fast-change-image-brightness-with-python-opencv
+    :param image: the image to enhance.
+    :return: the input image with altered brightness
+    """
+    hsv = cv2.cvtColor(image,cv2.COLOR_RGB2HSV)
+    random_bright = median + dev * np.random.uniform(-1.0, 1.0)
+    hsv[:,:,2] = hsv[:,:,2]*random_bright
+
+    rgb = cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
+    return rgb
+
+def generate_new_image(image, steering_angle, resize_dim, do_shear_prob=0.9):
+    """
+    :param image: the image to augment.
+    :param steering_angle: the steering label for this image, will be adjusted accordingly to the augmentation steps taken
+    :param do_shear_prob: the probability of performing a random shear transformation on the image
+    :return: the augmented image and steering angle
     """
 
     image = random_shades(image)
-    head = bernoulli.rvs(do_shear_prob)
-    if head == 1:
+    if random.random() < do_shear_prob:
         image, steering_angle = random_shear(image, steering_angle)
 
-    image, steering_angle = random_crop(image, steering_angle,tx_lower=-20,tx_upper=20,ty_lower=-10,ty_upper=10, rand=True)
+    image, steering_angle = random_crop(image, resize_dim, steering_angle, rand=True)
 
     image, steering_angle = random_flip(image, steering_angle)
 
@@ -168,26 +165,27 @@ def get_random_camera_data(csv, index):
 
     return (img, angle)
 
-def next_batch(csv, batch_size=64):
+def next_batch(samples, batch_size=64):
     # Get a random batch of data rows
-    random_rows = np.random.randint(0, len(csv), batch_size)
+    random_rows = np.random.randint(0, len(samples), batch_size)
     
     batch = []
     for index in random_rows:
-        data = get_random_camera_data(csv, index)
+        data = get_random_camera_data(samples, index)
         batch.append(data)
 
     return batch
 
-def generate_next_batch(csv, batch_size=64):
+def generate_next_batch(samples, resize_dim=(64,64), batch_size=64):
+
     while True:
         X_batch = []
         y_batch = []
-        images = next_batch(csv, batch_size)
+        images = next_batch(samples, batch_size)
         for img_file, angle in images:
             raw_image = plt.imread(img_file)
             raw_angle = angle
-            new_image, new_angle = generate_new_image(raw_image, raw_angle)
+            new_image, new_angle = generate_new_image(raw_image, raw_angle, resize_dim)
             X_batch.append(new_image)
             y_batch.append(new_angle)
 
