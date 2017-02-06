@@ -11,7 +11,7 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/placeholder.png "Model Visualization"
+[image1]: ./img/model.png "Model Visualization"
 [image2]: ./examples/placeholder.png "Grayscaling"
 [image3]: ./examples/placeholder_small.png "Recovery Image"
 [image4]: ./examples/placeholder_small.png "Recovery Image"
@@ -88,13 +88,19 @@ For details about how I created the training data, see the next section.
 
 ####1. Solution Design Approach
 
-I started with a relatively simple architecture first, with 4 or 5 layers, to start getting the feel of the project. I was surprised to see how far I could get with this basic architecture, which after some tuning I chose to use in the final version.
+I started with a relatively simple architecture first, with 4 or 5 layers, to start getting the feel of the project. I was surprised to see how far I could get with this basic architecture, but it still would not pass the first track.
 
-The Nvidia architecture used in the [paper](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf) linked from the project lesson pages was tested as well. This was the first model which got around the track successfully. I thought it would perform well because it was already tested on a similar task. Dropout was added to this model during testing. Other variants included trying to use some different activation functions like ELU, and also trying to use an activation layer on the output to make it converge quicker to the approximately -1, 1 range. All of these changes were discarded because they would not give the expected results on track.
+Then I started using the architecture used in Nvidia's [paper](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf), linked from the project lesson pages was tested as well. I expected this architecture should work well because it was used to solve a similar problem. This was the first model which got around the track successfully.
 
-- after 5 to 7 epochs overfitttng was found, validation error increasing
-- went back to basic model and found it worked better without ELU
+I found after 5 to 7 epochs overfitting happened in both models, this was noticeable because, while the testing loss was diminishing, validation error increased or stayed around the same value. To avoid this, dropout layers were added to this model during testing.
 
+After improving my results by using different data augmentation methods which I will detail latyer, I went back to fine tuning my architecture.
+
+Other variants included trying to use some different activation functions like ELU, and also trying to use an activation layer on the output to make it converge quicker to the approximately -1, 1 range. All of these changes were discarded because they would not give the expected results on track.
+
+In the end I decided to try a smaller network, so I went back to my original, basic architecture and added a couple more convolutional layers and one more fully connected layer. After some more fine tuning I found this network to perform better.
+
+The final model drives around track 1 without ever leaving the track, after training for 5 or 6 epochs of around 20000 samples. It is verified that it hasn't memorized track 1, by checking that the same model is also capable to finish track no. 2.
 
 In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
 
