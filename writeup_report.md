@@ -1,5 +1,5 @@
 
-**Behavioral Cloning Project**
+#Behavioral Cloning Project
 
 The goals / steps of this project are the following:
 * Use the simulator to collect data of good driving behavior
@@ -12,12 +12,12 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image1]: ./img/model.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/normal.png "Normal Image"
-[image7]: ./examples/augmented.png "Augmented Image"
+[image2]: ./img/center.jpg "Grayscaling"
+[image3]: ./img/recover_1.jpg "Recovery Image"
+[image4]: ./img/recover_2.jpg "Recovery Image"
+[image5]: ./img/recover_3.jpg "Recovery Image"
+[image6]: ./img/normal.png "Normal Image"
+[image7]: ./img/augmented.png "Augmented Image"
 [image8]: ./img/histogram_before.png "Histogram before augmentation"
 [image9]: ./img/histogram_after.png "Histogram after augmentation"
 
@@ -49,7 +49,7 @@ The model.py file contains the code for training and saving the convolution neur
 
 ###Model Architecture and Training Strategy
 
-####1. An appropriate model archtiecture has been employed
+####1. An appropriate model architecture has been employed
 
 My model consists of a convolutional neural network with 5 convolutional layers with filter sizes ranging from 3x3 to 8x8, followed by 3 fully connected layers.
 
@@ -119,7 +119,9 @@ To capture good driving behavior, I first recorded two laps on track one using c
 
 ![alt text][image2]
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
+I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to 
+recover to the center of the track from these situations. These images show what a recovery looks like starting from the right side
+(these images belong to the right camera):
 
 ![alt text][image3]
 ![alt text][image4]
@@ -139,17 +141,38 @@ The images are also cropped to remove the top and bottom parts, and then resized
 
 Here is a sample of the images before and after preprocessing:
 
-![alt text][image6]
-![alt text][image7]
+</br>
 
-After 
+*Before:*
+
+![Image Before preprocessing][image6]   
+ 
+ 
+</br>
+
+ 
+  
+*After(without resizing to 64x64):*
+
+![Image After preprocessing][image7]
+
+</br>
+
+All of this augmentation results in samples that cover most of the range of steering angles.
+as can be seen in these histograms:
+
+*Steering angles before augmentation:*
 
 ![alt text][image8]
+
+*Steering angles after augmentation:*
+
 ![alt text][image9]
 
-After the collection process, I had X number of data points. To preprocess this data I 
+After the collection process, I had 10195 data points. Data is shuffled and 3% of the data is separated into a validation set. 
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting.
 
+The data generator was set to take batches of 64 samples, and `model.fit_generator` is configured to generate epochs of 10000 images.
+Under these conditions, the ideal number of epochs was 12 as evidenced by the validation loss not improving anymore.
 
-I finally randomly shuffled the data set and put Y% of the data into a validation set. 
-
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+I used an adam optimizer so that manually training the learning rate wasn't necessary.
