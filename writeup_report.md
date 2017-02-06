@@ -16,8 +16,10 @@ The goals / steps of this project are the following:
 [image3]: ./examples/placeholder_small.png "Recovery Image"
 [image4]: ./examples/placeholder_small.png "Recovery Image"
 [image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
+[image6]: ./examples/normal.png "Normal Image"
+[image7]: ./examples/augmented.png "Augmented Image"
+[image8]: ./img/histogram_before.png "Histogram before augmentation"
+[image9]: ./img/histogram_after.png "Histogram after augmentation"
 
 ## Rubric Points
 ###Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
@@ -47,22 +49,9 @@ The model.py file contains the code for training and saving the convolution neur
 
 ###Model Architecture and Training Strategy
 
-####1. An appropriate model arcthiecture has been employed
+####1. An appropriate model archtiecture has been employed
 
-My model consists of a convolutional neural network with the following layers:
-- Input layer: 64x64x3 images
-- Convolutional: 16 filters (8x8), strides=(4, 4)
-- Convolutional: 32 filters (3x3), strides=(2, 2)
-- Max Pooling: 2x2, strides=(2,2), 'valid' padding
-- Convolutional 32 filters (5x5), strides=(1, 1)
-- Convolutional 64 filters (3x3), strides=(1, 1)
-- Max Pooling: 2x2, strides=(2,2), 'valid' padding
-- Convolutional 64 filters (5,5), strides=(2, 2)
-- Flattening layer
-- Fully connected (400)
-- Dense (100)
-- Dense (20)
-- Output: Dense (1)
+My model consists of a convolutional neural network with 5 convolutional layers with filter sizes ranging from 3x3 to 8x8, followed by 3 fully connected layers.
 
 All layers introduce nonlinearity by using RELU activation(model.py lines 40-64), and the data is normalized in the model using a Keras lambda layer (code line 36). 
 
@@ -102,23 +91,25 @@ In the end I decided to try a smaller network, so I went back to my original, ba
 
 The final model drives around track 1 without ever leaving the track, after training for 5 or 6 epochs of around 20000 samples. It is verified that it hasn't memorized track 1, by checking that the same model is also capable to finish track no. 2.
 
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
-
-
-
-To combat the overfitting, I modified the model so that ...
-
-Then I ... 
-
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
-
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
-
 ####2. Final Model Architecture
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+The final model architecture (model.py lines 34-64) consisted of a convolution neural network with the following layers and layer sizes:
 
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
+- Input layer: 64x64x3 images
+- Convolutional: 16 filters (8x8), strides=(4, 4)
+- Convolutional: 32 filters (3x3), strides=(2, 2)
+- Max Pooling: 2x2, strides=(2,2), 'valid' padding
+- Convolutional 32 filters (5x5), strides=(1, 1)
+- Convolutional 64 filters (3x3), strides=(1, 1)
+- Max Pooling: 2x2, strides=(2,2), 'valid' padding
+- Convolutional 64 filters (5,5), strides=(2, 2)
+- Flattening layer
+- Fully connected (400)
+- Dense (100)
+- Dense (20)
+- Output: Dense (1)
+
+Here is a visualization of the architecture:
 
 ![alt text][image1]
 
@@ -134,16 +125,29 @@ I then recorded the vehicle recovering from the left side and right sides of the
 ![alt text][image4]
 ![alt text][image5]
 
-Then I repeated this process on track two in order to get more data points.
+I did NOT use data from the second track for training the final model.
 
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
+Some additional augmentation was performed to generate a more regular distribution of steering angle sizes.
+
+The augmentation pipeline includes(in this order):
+- Random patches of shadows of triangular shape.
+- Shearing to the left or right randomly, with the appropriate correction on the steering angle. This generates a more uniform distribution on the angles.
+- Random brightness.
+- Random flipping images and angles to compensate for having too many samples of left or right turns.
+
+The images are also cropped to remove the top and bottom parts, and then resized to 64x64.
+
+Here is a sample of the images before and after preprocessing:
 
 ![alt text][image6]
 ![alt text][image7]
 
-Etc ....
+After 
 
-After the collection process, I had X number of data points. I then preprocessed this data by ...
+![alt text][image8]
+![alt text][image9]
+
+After the collection process, I had X number of data points. To preprocess this data I 
 
 
 I finally randomly shuffled the data set and put Y% of the data into a validation set. 
