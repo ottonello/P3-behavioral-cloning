@@ -59,25 +59,28 @@ My model consists of a convolutional neural network with the following layers:
 - Max Pooling: 2x2, strides=(2,2), 'valid' padding
 - Convolutional 64 filters (5,5), strides=(2, 2)
 - Flattening layer
-- 
+- Fully connected (400)
+- Dense (100)
+- Dense (20)
+- Output: Dense (1)
 
- 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
-
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+All layers introduce nonlinearity by using RELU activation(model.py lines 40-64), and the data is normalized in the model using a Keras lambda layer (code line 36). 
 
 ####2. Attempts to reduce overfitting in the model
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
+The model contains dropout layers in order to reduce overfitting (model.py lines 51-60). 
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+The input data was split into training and validation  sets to ensure that the model was not overfitting (code lines 71-80).
+The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track. Additional validation was performed by running the model in the secondary tracks.
 
 ####3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 69).
 
 ####4. Appropriate training data
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+The model was trained on a dataset obtained using an analog wheel input device. The dataset contains around 17 thousand data points. Some recovery driving is included, to enable the network to learn situations where
+the car has drifted off the track.
 
 For details about how I created the training data, see the next section. 
 
@@ -85,11 +88,17 @@ For details about how I created the training data, see the next section.
 
 ####1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to ...
+I started with a relatively simple architecture first, with 4 or 5 layers, to start getting the feel of the project. I was surprised to see how far I could get with this basic architecture, which after some tuning I chose to use in the final version.
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+The Nvidia architecture used in the [paper](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf) linked from the project lesson pages was tested as well. This was the first model which got around the track successfully. I thought it would perform well because it was already tested on a similar task. Dropout was added to this model during testing. Other variants included trying to use some different activation functions like ELU, and also trying to use an activation layer on the output to make it converge quicker to the approximately -1, 1 range. All of these changes were discarded because they would not give the expected results on track.
+
+- after 5 to 7 epochs overfitttng was found, validation error increasing
+- went back to basic model and found it worked better without ELU
+
 
 In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
+
+
 
 To combat the overfitting, I modified the model so that ...
 
