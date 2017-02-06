@@ -172,7 +172,7 @@ as can be seen in these histograms:
 After the collection process, I had 10195 data points. Data is shuffled and 3% of the data is separated into a validation set. 
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting.
 
-The data generator was set to take batches of 64 samples, and `model.fit_generator` is configured to generate epochs of 10000 images.
-Under these conditions, the ideal number of epochs was 12 as evidenced by the validation loss not improving anymore.
+The data generator was set to take batches of 64 samples, and `model.fit_generator` is configured to generate epochs of 20000 images.
+Under these conditions, the ideal number of epochs was 6 as evidenced by the validation loss not improving anymore.
 
 I used an adam optimizer so that manually training the learning rate wasn't necessary.
