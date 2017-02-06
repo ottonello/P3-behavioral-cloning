@@ -140,7 +140,7 @@ def get_random_camera_data(csv, index):
     if rnd == COLUMNS.index('left'):
         angle = angle + STEERING_COEFFICIENT
     elif rnd == COLUMNS.index('right'):
-        angle = angle - dsteering
+        angle = angle - STEERING_COEFFICIENT
 
     return (img, angle)
 
