@@ -30,8 +30,10 @@ The goals / steps of this project are the following:
 My project includes the following files:
 * model.py containing the script to create and train the model
 * drive.py for driving the car in autonomous mode
+* generators.py containing generators and data augmentation functions.
 * model.h5 containing a trained convolution neural network 
-* writeup_report.md or writeup_report.pdf summarizing the results
+* model.json containing the architecture of the model
+* writeup_report.md summarizing the results
 
 ####2. Submssion includes functional code
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
@@ -39,7 +41,7 @@ Using the Udacity provided simulator and my drive.py file, the car can be driven
 python drive.py model.h5
 ```
 
-####3. Submssion code is usable and readable
+####3. Submission code is usable and readable
 
 The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
 
@@ -47,7 +49,19 @@ The model.py file contains the code for training and saving the convolution neur
 
 ####1. An appropriate model arcthiecture has been employed
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
+My model consists of a convolutional neural network with the following layers:
+- Input layer: 64x64x3 images
+- Convolutional: 16 filters (8x8), strides=(4, 4)
+- Convolutional: 32 filters (3x3), strides=(2, 2)
+- Max Pooling: 2x2, strides=(2,2), 'valid' padding
+- Convolutional 32 filters (5x5), strides=(1, 1)
+- Convolutional 64 filters (3x3), strides=(1, 1)
+- Max Pooling: 2x2, strides=(2,2), 'valid' padding
+- Convolutional 64 filters (5,5), strides=(2, 2)
+- Flattening layer
+- 
+
+ 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
 
 The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
 

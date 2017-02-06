@@ -10,45 +10,36 @@ from scipy.stats import bernoulli
 # CSV column names
 COLUMNS = ['center','left','right','steering','throttle','brake','speed']
 
+HORIZON=60;
+BONNET=136
 # Parameters to calculate the steering correction when taking left/right cameras
 offset=1.0
 dist=10.0
 STEERING_COEFFICIENT = offset/dist * 360/( 2*np.pi)  / 25.0
 
 def random_flip(image, steering_angle, flipping_prob=0.5):
-    """
-    Based on the outcome of an coin flip, the image will be flipped.
-    If flipping is applied, the steering angle will be negated.
-    :param image: Source image
-    :param steering_angle: Original steering angle
-    :return: Both flipped image and new steering angle
-    """
-    head = bernoulli.rvs(flipping_prob)
-    if head:
+    if random.random() < flipping_prob:
         return np.fliplr(image), -1 * steering_angle
     else:
         return image, steering_angle
 
-# Generate a random triangular shade on the image
-# area parameter is a percentage of the total image area
 def random_shades(image, area=0.1):
+    """
+    Generate a random triangular shade on the image
+    area parameter is a percentage of the total image area
+    """
     # Generate a separate buffer
     shadows = image.copy()
 
     image_area = shadows.shape[0] * shadows.shape[1]
-    # print("Area: %f" % image_area)
     shadow_area = area * image_area
-    # print("Shadow area: %f" % shadow_area)
     poly = get_triangle(shadow_area, shadows.shape[0], shadows.shape[1])
-    # print(poly)
     cv2.fillPoly(shadows, np.array([poly]), -1)
 
     alpha = .6
     return cv2.addWeighted(shadows, alpha, image, 1-alpha,0,image)
 
 def get_triangle(area, max_x, max_y):
-    # choose
-    # print("Triangle max_x: %d max_y: %d, area %f" % (max_x, max_y,area) )
     # Get a random point within the constraints
     x1 = random.randint(0, max_x)
     y1 = random.randint(0, max_y)
@@ -59,17 +50,17 @@ def get_triangle(area, max_x, max_y):
     n = 2 * area - x1 * y2 + x2 * y1
     m = y1 - x1
     p = x2 - y2
-    # print("n = %f, m = %f, p = %f"% (n,m,p))
     max_y3 = int(n/m) if m != 0 else int(n)
     y3 = random.randint(0, abs(max_y3))
-    # print("y3 = %f"% y3)
     max_x3 = int(n/p - m * y3) if p != 0 else int(n)
     x3 = random.randint(0, abs(max_x3))
     return [[x1,y1],[x2,y2],[x3,y3]]
 
 def random_shear(image, steering_angle, shear_range=200):
     """
-    Source: https://medium.com/@ksakmann/behavioral-cloning-make-a-car-drive-like-yourself-dc6021152713#.7k8vfppvk
+    Sources: 
+    https://medium.com/@ksakmann/behavioral-cloning-make-a-car-drive-like-yourself-dc6021152713#.7k8vfppvk
+    https://github.com/ksakmann/CarND-BehavioralCloning/blob/master/model.py
     :param image:
         Source image on which the shear operation will be applied
     :param steering_angle:
@@ -91,29 +82,15 @@ def random_shear(image, steering_angle, shear_range=200):
 
     return image, steering_angle
 
-def random_crop(image,resize_dim,steering=0.0,tx_lower=-20,tx_upper=20,ty_lower=-10,ty_upper=10,rand=True):
-    # we will randomly crop subsections of the image and use them as our data set.
-    # also the input to the network will need to be cropped, but of course not randomly and centered.
+def crop(image):
     shape = image.shape
-    col_start,col_end =abs(tx_lower),shape[1]-tx_upper
-    horizon=60;
-    bonnet=136
-    if rand:
-        tx= np.random.randint(tx_lower,tx_upper+1)
-        ty= np.random.randint(ty_lower,ty_upper+1)
-    else:
-        tx,ty=0,0
     
-    random_crop = image[horizon+ty:bonnet+ty,col_start+tx:col_end+tx,:]
-    image = cv2.resize(random_crop,resize_dim,cv2.INTER_AREA)
-    # the steering variable needs to be updated to counteract the shift 
-    if tx_lower != tx_upper:
-        dsteering = -tx/(tx_upper-tx_lower)/3.0
-    else:
-        dsteering = 0
-    steering += dsteering
+    cropped = image[HORIZON:BONNET,0:shape[1],:]
     
-    return image,steering
+    return cropped
+
+def resize(image, resize_dim):
+    return cv2.resize(image,resize_dim,cv2.INTER_AREA)
 
 def random_brightness(image, median=0.8, dev=0.4):
     """
@@ -140,7 +117,8 @@ def generate_new_image(image, steering_angle, resize_dim, do_shear_prob=0.9):
     if random.random() < do_shear_prob:
         image, steering_angle = random_shear(image, steering_angle)
 
-    image, steering_angle = random_crop(image, resize_dim, steering_angle, rand=True)
+    image = crop(image)
+    image = resize(image, resize_dim)
 
     image, steering_angle = random_flip(image, steering_angle)
 
@@ -150,7 +128,8 @@ def generate_new_image(image, steering_angle, resize_dim, do_shear_prob=0.9):
 
 # center,left,right,steering,throttle,brake,speed
 def get_random_camera_data(csv, index):
-    """Get one of the left, center or right images together with
+    """
+    Get one of the left, center or right images together with
     the corresponding(adjusted) steering angle.
     """
     rnd = np.random.randint(0, 3)
@@ -166,7 +145,9 @@ def get_random_camera_data(csv, index):
     return (img, angle)
 
 def next_batch(samples, batch_size=64):
-    # Get a random batch of data rows
+    """
+    Get a random batch of data rows
+    """
     random_rows = np.random.randint(0, len(samples), batch_size)
     
     batch = []
@@ -177,7 +158,12 @@ def next_batch(samples, batch_size=64):
     return batch
 
 def generate_next_batch(samples, resize_dim=(64,64), batch_size=64):
-
+    """
+    Generator for image, steering angle batches.
+    :param samples: set of training samples, as read from the .csv files
+    :param resize_dim: images will be resized to these dimensions
+    :param batch_size: the size of the batches the generator returns.
+    """
     while True:
         X_batch = []
         y_batch = []
