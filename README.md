@@ -23,4 +23,4 @@ When training has finished, model and weights files are written:
   * `model.h5`
 
 ## Driving
-* Run `python drive.py`
+* Run `python drive.py model.json`
