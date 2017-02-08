@@ -26,11 +26,7 @@ When training has finished, model and weights files are written:
 
 
 
-[//]: # (Image References)
-
-[video1]: ./img/sample1.mp4 "Center driving sample"
-
 ## Obtaining training data
 The training data is obtained from the Self Driving Car Engineer Nanodegree simulator, samples of centered driving are taken
 first:
-![alt text][video1]
+[![Driving sample](http://img.youtube.com/vi/hzM3BnJou98/0.jpg)](https://www.youtube.com/watch?v=hzM3BnJou98&feature=youtu.be "Driving Sample")
