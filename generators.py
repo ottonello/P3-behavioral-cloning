@@ -14,7 +14,7 @@ HORIZON=60;
 BONNET=136
 # Parameters to calculate the steering correction when taking left/right cameras
 offset=1.0
-dist=10.0
+dist=15.0
 STEERING_COEFFICIENT = offset/dist * 360/( 2*np.pi)  / 25.0
 
 def random_flip(image, steering_angle, flipping_prob=0.5):
@@ -36,25 +36,32 @@ def random_shades(image, area=0.1):
     poly = get_triangle(shadow_area, shadows.shape[0], shadows.shape[1])
     cv2.fillPoly(shadows, np.array([poly]), -1)
 
-    alpha = .6
+    alpha = np.random.uniform(0.6, 0.9)
     return cv2.addWeighted(shadows, alpha, image, 1-alpha,0,image)
 
 def get_triangle(area, max_x, max_y):
-    # Get a random point within the constraints
-    x1 = random.randint(0, max_x)
-    y1 = random.randint(0, max_y)
-    # Get some other random point within the constraints,
-    x2 = random.randint(0, max_x)
-    y2 = random.randint(0, max_y)
-    # Get some other point, making sure the area now 
-    n = 2 * area - x1 * y2 + x2 * y1
-    m = y1 - x1
-    p = x2 - y2
-    max_y3 = int(n/m) if m != 0 else int(n)
-    y3 = random.randint(0, abs(max_y3))
-    max_x3 = int(n/p - m * y3) if p != 0 else int(n)
-    x3 = random.randint(0, abs(max_x3))
-    return [[x1,y1],[x2,y2],[x3,y3]]
+    horizontal = np.random.uniform()
+
+    if horizontal < 0.5:
+        x1 = random.randint(0, max_x/2)
+        y1 = 0
+        x2 = random.randint(max_x / 2, max_x)
+        y2 = 0
+        x3 = random.randint(max_x / 2, max_x)
+        y3 = max_y       
+        x4 = random.randint(0, max_x/2)
+        y4 = max_y
+    else:
+        x1 = 0
+        y1 = random.randint(0, max_y/2)
+        x2 = 0
+        y2 = random.randint(max_y / 2, max_y)
+        x3 = max_x
+        y3 = random.randint(max_y / 2, max_y)       
+        x4 = max_x
+        y4 = random.randint(0, max_y/2)
+    
+    return [[x1,y1],[x2,y2],[x3,y3], [x4,y4]]
 
 def random_shear(image, steering_angle, shear_range=200):
     """
@@ -105,7 +112,7 @@ def random_brightness(image, median=0.8, dev=0.4):
     rgb = cv2.cvtColor(hsv,cv2.COLOR_HSV2RGB)
     return rgb
 
-def generate_new_image(image, steering_angle, resize_dim, do_shear_prob=0.9):
+def generate_new_image(image, steering_angle, resize_dim, do_shear_prob=0.5):
     """
     :param image: the image to augment.
     :param steering_angle: the steering label for this image, will be adjusted accordingly to the augmentation steps taken
@@ -113,12 +120,12 @@ def generate_new_image(image, steering_angle, resize_dim, do_shear_prob=0.9):
     :return: the augmented image and steering angle
     """
 
-    image = random_shades(image)
     if random.random() < do_shear_prob:
         image, steering_angle = random_shear(image, steering_angle)
 
     image = crop(image)
     image = resize(image, resize_dim)
+    image = random_shades(image)
 
     image, steering_angle = random_flip(image, steering_angle)
 
