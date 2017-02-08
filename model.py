@@ -31,6 +31,8 @@ resize_y=64
 # Input layer shape
 ch, row, col = 3, resize_x, resize_y
 
+# Model definition taken from Nvidia's paper at:
+# http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf
 def nv():
     model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1.,
@@ -74,11 +76,12 @@ def nv():
     model.add(Dense(1))
     return model
 
-# construct the selected model and print it to the screen
+# construct the selected model and print it out
 model = nv()
 model.summary()
 model.compile(loss='mean_squared_error', optimizer=Adam(lr=learning_rate))
 
+# Function to shuffle and split the training data taking as input the .csv file rows
 def split(csv, val_split):
 	shuffled = csv.iloc[np.random.permutation(len(csv))]
 	validation_samples = int(len(csv) * val_split)
@@ -95,6 +98,7 @@ print("Total samples: ", len(csv))
 print("Training size: ", len(train_data))
 print("Validation size: ", number_of_validation_samples)
 
+# Use generators to obtain the batches of data, resized to the appropriate size
 train_gen = generate_next_batch(train_data, resize_dim=(resize_x, resize_y))
 validation_gen = generate_next_batch(val_data, resize_dim=(resize_x, resize_y))
 
@@ -105,6 +109,7 @@ history = model.fit_generator(train_gen,
                   nb_val_samples=number_of_validation_samples,
                   verbose=1)
 
+# Save the model and weights
 model_json = model.to_json()
 with open(OUTPUT_MODEL_FILE, "w") as json_file:
     json_file.write(model_json)
@@ -113,12 +118,9 @@ model.save(OUTPUT_WEIGHTS_FILE)
 K.clear_session()
 
 
-
 ###
 ## Other Model definitions
 ###
-
-
 def basic():
     model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1.,

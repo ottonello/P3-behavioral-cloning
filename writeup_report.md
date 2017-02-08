@@ -69,7 +69,7 @@ The model used an adam optimizer, so the learning rate was not tuned manually (m
 
 ####4. Appropriate training data
 
-The model was trained on a dataset obtained using an analog wheel input device. The original dataset contains around 17000 
+The model was trained on a dataset obtained using an analog wheel input device. The original dataset contains around 10000 
 data points. Some recovery driving is included, to enable the network to learn situations where the car has drifted off the track.
 
 For details about how I created the training data, see the next section. 
@@ -85,11 +85,8 @@ I found after 5 to 7 epochs overfitting happened in both models, this was notice
 error increased or stayed around the same value. To avoid this, dropout layers were added to this model during testing.
 
 After improving my results by using different data augmentation methods which I will detail layer, I started to fine tuning my architecture
-by adding more layers on the smaller network but I always found my changes would either make the network
- too small to learn enough features, shown in the fact that no matter how many epochs are used the accuracy stays high,
- or would make it overfit very quickly. Because of this I went back to the architecture
- used by Nvidia in the well known  [paper](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf).
- I expected this architecture should work well because it was used to solve a similar problem.
+by adding more layers on the smaller network but I always found my changes would either make the network too small to learn enough features, shown in the fact that no matter how many epochs are used the accuracy stays high,
+or would make it overfit very quickly. Because of this I went back to the architecture used by Nvidia in the well known  [paper](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf). I expected this architecture should work well because it was used to solve a similar problem. My alternative model is also included in the model.py file only for documentation purposes.
 
 Other variants included trying to use some different activation functions like ELU, and also trying to use an activation layer on the output 
 to make it converge quicker to the approximately -1, 1 range. All of these changes were quikly discarded because they would not give the expected results on track. 
@@ -188,7 +185,7 @@ After the collection process, I had 10195 data points. Data is shuffled and 3% o
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting.
 
 The data generator was set to take batches of 64 samples, and `model.fit_generator` is configured to generate epochs of 20000 images.
-Under these conditions, the ideal number of epochs was 7 as evidenced by the validation loss not improving anymore.
+Under these conditions, the ideal number of epochs was 7(which would) as evidenced by the validation loss not improving anymore.
 This can also be confirmed on track number 2, since when the network has memorized track number 1 the performance there is
 very bad. The final model can finish both tracks.
 

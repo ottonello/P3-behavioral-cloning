@@ -10,6 +10,7 @@ from scipy.stats import bernoulli
 # CSV column names
 COLUMNS = ['center','left','right','steering','throttle','brake','speed']
 
+# Image cropping delimiters
 HORIZON=60
 BONNET=136
 # Parameters to calculate the steering correction when taking left/right cameras
@@ -19,12 +20,15 @@ dist=15.0
 STEERING_COEFFICIENT = offset/dist * 360/( 2*np.pi)  / 25.0
 
 def random_flip(image, steering_angle, flipping_prob=0.5):
+    """
+    Randomly flip an image, with a given probability
+    """
     if random.random() < flipping_prob:
         return np.fliplr(image), -1 * steering_angle
     else:
         return image, steering_angle
 
-def random_shadows(image, area=0.1):
+def random_shadows(image):
     """
     Generate a random shadow on the image
     area parameter is a percentage of the total image area
@@ -33,14 +37,16 @@ def random_shadows(image, area=0.1):
     shadows = image.copy()
 
     image_area = shadows.shape[0] * shadows.shape[1]
-    shadow_area = area * image_area
-    poly = get_shadow_poly(shadow_area, shadows.shape[0], shadows.shape[1])
+    poly = get_shadow_poly(shadows.shape[0], shadows.shape[1])
     cv2.fillPoly(shadows, np.array([poly]), -1)
 
     alpha = np.random.uniform(0.6, 0.9)
     return cv2.addWeighted(shadows, alpha, image, 1-alpha,0,image)
 
-def get_shadow_poly(area, max_x, max_y):
+def get_shadow_poly(max_x, max_y):
+    """
+    Get the polygons of a random a
+    """
     horizontal = np.random.uniform()
 
     if horizontal < 0.5:
