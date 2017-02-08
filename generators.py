@@ -10,9 +10,10 @@ from scipy.stats import bernoulli
 # CSV column names
 COLUMNS = ['center','left','right','steering','throttle','brake','speed']
 
-HORIZON=60;
+HORIZON=60
 BONNET=136
 # Parameters to calculate the steering correction when taking left/right cameras
+# https://medium.com/@ksakmann/behavioral-cloning-make-a-car-drive-like-yourself-dc6021152713#.fc0drgwk7
 offset=1.0
 dist=15.0
 STEERING_COEFFICIENT = offset/dist * 360/( 2*np.pi)  / 25.0
@@ -23,9 +24,9 @@ def random_flip(image, steering_angle, flipping_prob=0.5):
     else:
         return image, steering_angle
 
-def random_shades(image, area=0.1):
+def random_shadows(image, area=0.1):
     """
-    Generate a random triangular shade on the image
+    Generate a random shadow on the image
     area parameter is a percentage of the total image area
     """
     # Generate a separate buffer
@@ -33,13 +34,13 @@ def random_shades(image, area=0.1):
 
     image_area = shadows.shape[0] * shadows.shape[1]
     shadow_area = area * image_area
-    poly = get_triangle(shadow_area, shadows.shape[0], shadows.shape[1])
+    poly = get_shadow_poly(shadow_area, shadows.shape[0], shadows.shape[1])
     cv2.fillPoly(shadows, np.array([poly]), -1)
 
     alpha = np.random.uniform(0.6, 0.9)
     return cv2.addWeighted(shadows, alpha, image, 1-alpha,0,image)
 
-def get_triangle(area, max_x, max_y):
+def get_shadow_poly(area, max_x, max_y):
     horizontal = np.random.uniform()
 
     if horizontal < 0.5:
@@ -125,7 +126,7 @@ def generate_new_image(image, steering_angle, resize_dim, do_shear_prob=0.5):
 
     image = crop(image)
     image = resize(image, resize_dim)
-    image = random_shades(image)
+    image = random_shadows(image)
 
     image, steering_angle = random_flip(image, steering_angle)
 
@@ -164,7 +165,7 @@ def next_batch(samples, batch_size=64):
 
     return batch
 
-def generate_next_batch(samples, resize_dim=(64,64), batch_size=64):
+def generate_next_batch(samples, resize_dim=(64,64), batch_size=64, augment=True):
     """
     Generator for image, steering angle batches.
     :param samples: set of training samples, as read from the .csv files
@@ -176,10 +177,13 @@ def generate_next_batch(samples, resize_dim=(64,64), batch_size=64):
         y_batch = []
         images = next_batch(samples, batch_size)
         for img_file, angle in images:
-            raw_image = plt.imread(img_file)
-            raw_angle = angle
-            new_image, new_angle = generate_new_image(raw_image, raw_angle, resize_dim)
-            X_batch.append(new_image)
-            y_batch.append(new_angle)
+            image = plt.imread(img_file)
+            if augment:
+                image, angle = generate_new_image(image, angle, resize_dim)
+            else:
+                image = crop(image)
+                image = resize(image, resize_dim)
+            X_batch.append(image)
+            y_batch.append(angle)
 
         yield np.array(X_batch), np.array(y_batch)

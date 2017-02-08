@@ -28,12 +28,13 @@ def main():
 	layer2 = Model(input=model.input, output=model.get_layer('convolution2d_2').output)
 	layer4 = Model(input=model.input, output=model.get_layer('convolution2d_4').output)
 
+	cropped_size = (320, 76)
 	show_images = True
 	if show_images:
 		for img, angle in zip(imgs,angles):
 			print("angle: ", angle)
 			print("original")
-			temp = cv2.resize(img, (200, 66), cv2.INTER_AREA)
+			temp = cv2.resize(img, cropped_size, cv2.INTER_AREA)
 			plt.imshow(img)
 			plt.show()
 			img = np.expand_dims(img, axis=0)
@@ -42,9 +43,9 @@ def main():
 			visual_layer4 = layer4.predict(img)
 
 			print(np.shape(visual_layer1))
-			arr_1 = np.swapaxes(visual_layer1[0], 2, 0)
-			arr_2 = np.swapaxes(visual_layer2[0], 2, 0)
-			arr_4 = np.swapaxes(visual_layer4[0], 2, 0)
+			arr_1 = np.swapaxes(np.swapaxes(visual_layer1[0], 2, 0), 1,2)
+			arr_2 = np.swapaxes(np.swapaxes(visual_layer2[0], 2, 0), 1,2)
+			arr_4 = np.swapaxes(np.swapaxes(visual_layer4[0], 2, 0), 1,2)
 			
 			print("layer 1 feature map")
 
@@ -52,7 +53,7 @@ def main():
 			for i in range(24):
 			    plt.subplot(8, 4, i+1)
 			    temp = arr_1[i]
-			    temp = cv2.resize(temp, (200, 66), cv2.INTER_AREA)
+			    temp = cv2.resize(temp, cropped_size, cv2.INTER_AREA)
 			    plt.imshow(temp)
 			    plt.axis('off')
 			plt.show()
@@ -63,7 +64,7 @@ def main():
 			for i in range(36):
 			    plt.subplot(6, 6, i+1)
 			    temp = arr_2[i]
-			    temp = cv2.resize(temp, (200, 66), cv2.INTER_AREA)
+			    temp = cv2.resize(temp, cropped_size, cv2.INTER_AREA)
 			    plt.imshow(temp)
 			    plt.axis('off')
 			plt.show()
@@ -72,7 +73,7 @@ def main():
 			for i in range(64):
 			    plt.subplot(8, 8, i+1)
 			    temp = arr_4[i]
-			    temp = cv2.resize(temp, (200, 66), cv2.INTER_AREA)
+			    temp = cv2.resize(temp, cropped_size, cv2.INTER_AREA)
 			    plt.imshow(temp)
 			    plt.axis('off')
 			plt.show()
