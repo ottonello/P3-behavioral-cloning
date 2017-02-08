@@ -24,6 +24,13 @@ When training has finished, model and weights files are written:
 * Open Udacity's simulator
 * Run `python drive.py`
 
+
+
+[//]: # (Image References)
+
+[video1]: ./img/sample1.mp4 "Center driving sample"
+
 ## Obtaining training data
 The training data is obtained from the Self Driving Car Engineer Nanodegree simulator, samples of centered driving are taken
 first:
+![alt text][video1]
