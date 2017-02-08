@@ -45,21 +45,22 @@ python drive.py model.h5
 
 ####3. Submission code is usable and readable
 
-The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
+The model.py file contains the code for training and saving the convolution neural network. 
+The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
 
 ###Model Architecture and Training Strategy
 
 ####1. An appropriate model architecture has been employed
 
-My model consists of a convolutional neural network with 5 convolutional layers with filter sizes ranging from 3x3 to 8x8, followed by 3 fully connected layers.
+My model consists of a convolutional neural network with 5 convolutional layers with filter sizes ranging from 3x3 to 5x5, followed by 4 fully connected layers.
 
-All layers introduce nonlinearity by using RELU activation(model.py lines 40-64), and the data is normalized in the model using a Keras lambda layer (code line 36). 
+All layers introduce nonlinearity by using RELU activation(model.py lines 60-75), and the data is normalized in the model using a Keras lambda layer (code line 36). 
 
 ####2. Attempts to reduce overfitting in the model
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 51-60). 
+The model contains dropout layers in order to reduce overfitting (model.py lines 60-75). 
 
-The input data was split into training and validation  sets to ensure that the model was not overfitting (code lines 71-80).
+The input data was split into training and validation  sets to ensure that the model was not overfitting (code lines 82-91).
 The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track. Additional validation was performed by running the model in the secondary tracks.
 
 ####3. Model parameter tuning
@@ -68,8 +69,8 @@ The model used an adam optimizer, so the learning rate was not tuned manually (m
 
 ####4. Appropriate training data
 
-The model was trained on a dataset obtained using an analog wheel input device. The dataset contains around 17 thousand data points. Some recovery driving is included, to enable the network to learn situations where
-the car has drifted off the track.
+The model was trained on a dataset obtained using an analog wheel input device. The original dataset contains around 17000 
+data points. Some recovery driving is included, to enable the network to learn situations where the car has drifted off the track.
 
 For details about how I created the training data, see the next section. 
 
@@ -77,41 +78,55 @@ For details about how I created the training data, see the next section.
 
 ####1. Solution Design Approach
 
-I started with a relatively simple architecture first, with 4 or 5 layers, to start getting the feel of the project. I was surprised to see how far I could get with this basic architecture, but it still would not pass the first track.
+I started with a relatively simple architecture first, with 4 or 5 layers, to start getting the feel of the project. 
+I was surprised to see how far I could get with this basic architecture, but it still would not pass the first track.
 
-Then I started using the architecture used in Nvidia's [paper](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf), linked from the project lesson pages was tested as well. I expected this architecture should work well because it was used to solve a similar problem. This was the first model which got around the track successfully.
+I found after 5 to 7 epochs overfitting happened in both models, this was noticeable because, while the testing loss was diminishing, validation 
+error increased or stayed around the same value. To avoid this, dropout layers were added to this model during testing.
 
-I found after 5 to 7 epochs overfitting happened in both models, this was noticeable because, while the testing loss was diminishing, validation error increased or stayed around the same value. To avoid this, dropout layers were added to this model during testing.
+After improving my results by using different data augmentation methods which I will detail layer, I started to fine tuning my architecture
+by adding more layers on the smaller network but I always found my changes would either make the network
+ too small to learn enough features, shown in the fact that no matter how many epochs are used the accuracy stays high,
+ or would make it overfit very quickly. Because of this I went back to the architecture
+ used by Nvidia in the well known  [paper](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf).
+ I expected this architecture should work well because it was used to solve a similar problem.
 
-After improving my results by using different data augmentation methods which I will detail latyer, I went back to fine tuning my architecture.
-
-Other variants included trying to use some different activation functions like ELU, and also trying to use an activation layer on the output to make it converge quicker to the approximately -1, 1 range. All of these changes were discarded because they would not give the expected results on track.
-
-In the end I decided to try a smaller network, so I went back to my original, basic architecture and added a couple more convolutional layers and one more fully connected layer. After some more fine tuning I found this network to perform better.
-
-The final model drives around track 1 without ever leaving the track, after training for 5 or 6 epochs of around 20000 samples. It is verified that it hasn't memorized track 1, by checking that the same model is also capable to finish track no. 2.
+Other variants included trying to use some different activation functions like ELU, and also trying to use an activation layer on the output 
+to make it converge quicker to the approximately -1, 1 range. All of these changes were quikly discarded because they would not give the expected results on track. 
 
 ####2. Final Model Architecture
 
-The final model architecture (model.py lines 34-64) consisted of a convolution neural network with the following layers and layer sizes:
+The final model architecture (model.py lines 34-75) consisted of a convolution neural network with the following layers and layer sizes:
 
 - Input layer: 64x64x3 images
-- Convolutional: 16 filters (8x8), strides=(4, 4)
-- Convolutional: 32 filters (3x3), strides=(2, 2)
-- Max Pooling: 2x2, strides=(2,2), 'valid' padding
-- Convolutional 32 filters (5x5), strides=(1, 1)
+- Convolutional: 24 filters (5,5), strides=(2, 2), 'same' padding
+- Max Pooling: 2x2, strides=(1,1)
+
+- Convolutional: 36 filters (5x5), strides=(2, 2)
+- Max Pooling: 2x2, strides=(1,1), 'valid' padding
+
+- Convolutional 48 filters (5x5), strides=(2, 2)
+- Max Pooling: 2x2, strides=(1,1), 'valid' padding
+
 - Convolutional 64 filters (3x3), strides=(1, 1)
 - Max Pooling: 2x2, strides=(2,2), 'valid' padding
-- Convolutional 64 filters (5,5), strides=(2, 2)
+
+- Convolutional 64 filters (3x3), strides=(1, 1)
+- Max Pooling: 2x2, strides=(2,2), 'valid' padding
+
 - Flattening layer
-- Fully connected (400)
+- Fully connected (1164)
 - Dense (100)
-- Dense (20)
+- Dense (50)
+- Dense (10)
 - Output: Dense (1)
 
 Here is a visualization of the architecture:
 
 ![alt text][image1]
+
+____________________________________________________________________________________________________
+
 
 ####3. Creation of the Training Set & Training Process
 
@@ -173,6 +188,8 @@ After the collection process, I had 10195 data points. Data is shuffled and 3% o
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting.
 
 The data generator was set to take batches of 64 samples, and `model.fit_generator` is configured to generate epochs of 20000 images.
-Under these conditions, the ideal number of epochs was 6 as evidenced by the validation loss not improving anymore.
+Under these conditions, the ideal number of epochs was 7 as evidenced by the validation loss not improving anymore.
+This can also be confirmed on track number 2, since when the network has memorized track number 1 the performance there is
+very bad. The final model can finish both tracks.
 
 I used an adam optimizer so that manually training the learning rate wasn't necessary.
