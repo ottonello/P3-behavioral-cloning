@@ -30,5 +30,5 @@ When training has finished, model and weights files are written:
 The training data is obtained from the Self Driving Car Engineer Nanodegree simulator, samples of centered driving are taken
 first:
 
-<iframe title="YouTube video player" width="480" height="390" src="http://www.youtube.com/watch?v=hzM3BnJou98?autoplay=1" frameborder="0" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/hzM3BnJou98" frameborder="0" allowfullscreen></iframe>
 
