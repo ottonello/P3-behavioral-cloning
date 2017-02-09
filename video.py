@@ -13,7 +13,7 @@ def main():
     parser.add_argument(
         '--fps',
         type=int,
-        default=60,
+        default=30,
         help='FPS (Frames per second) setting for the video.')
     args = parser.parse_args()
 

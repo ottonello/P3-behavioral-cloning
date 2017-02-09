@@ -45,7 +45,9 @@ def random_shadows(image):
 
 def get_shadow_poly(max_x, max_y):
     """
-    Get the polygons of a random a
+    Get the polygons of a random area delimited between
+    max_x, max_y. The polygons generated will either be horizontal
+    or vertically aligned with the image, with a random distribution.
     """
     horizontal = np.random.uniform()
 
@@ -97,6 +99,10 @@ def random_shear(image, steering_angle, shear_range=200):
     return image, steering_angle
 
 def crop(image):
+    """
+    Crop the image between the given delimiters for the
+    horizon and the bonnet of the car.
+    """
     shape = image.shape
     
     cropped = image[HORIZON:BONNET,0:shape[1],:]
@@ -130,13 +136,13 @@ def generate_new_image(image, steering_angle, resize_dim, do_shear_prob=0.5):
     if random.random() < do_shear_prob:
         image, steering_angle = random_shear(image, steering_angle)
 
-    image = crop(image)
-    image = resize(image, resize_dim)
-    image = random_shadows(image)
+    # image = crop(image)
+    # image = resize(image, resize_dim)
+    # image = random_shadows(image)
 
-    image, steering_angle = random_flip(image, steering_angle)
+    # image, steering_angle = random_flip(image, steering_angle)
 
-    image = random_brightness(image)
+    # image = random_brightness(image)
 
     return image, steering_angle
 

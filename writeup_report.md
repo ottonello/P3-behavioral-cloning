@@ -78,15 +78,17 @@ For details about how I created the training data, see the next section.
 
 ####1. Solution Design Approach
 
-I started with a relatively simple architecture first, with 4 or 5 layers, to start getting the feel of the project. 
+I started with a relatively simple architecture first, with 6 layers total, to start getting the feel of the project. 
 I was surprised to see how far I could get with this basic architecture, but it still would not pass the first track.
+
+After improving my results by using different data augmentation methods which I will detail layer, I thought about trying to modify the architecture
+by adding more layers on the smaller network but I always found my changes would either make the network too small to learn enough features, shown in the fact that no matter how many epochs are used the accuracy stays high,
+or would make it overfit very quickly.
+
+Because of this I went back to the architecture used by Nvidia in the well known [paper](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf). I expected this architecture should work well because it was used to solve a similar problem, and indeed I got results very quickly using this model. This architecture performed very well without any further modifications. My alternative model is also included in the model.py file only for documentation purposes.
 
 I found after 5 to 7 epochs overfitting happened in both models, this was noticeable because, while the testing loss was diminishing, validation 
 error increased or stayed around the same value. To avoid this, dropout layers were added to this model during testing.
-
-After improving my results by using different data augmentation methods which I will detail layer, I started to fine tuning my architecture
-by adding more layers on the smaller network but I always found my changes would either make the network too small to learn enough features, shown in the fact that no matter how many epochs are used the accuracy stays high,
-or would make it overfit very quickly. Because of this I went back to the architecture used by Nvidia in the well known  [paper](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf). I expected this architecture should work well because it was used to solve a similar problem. My alternative model is also included in the model.py file only for documentation purposes.
 
 Other variants included trying to use some different activation functions like ELU, and also trying to use an activation layer on the output 
 to make it converge quicker to the approximately -1, 1 range. All of these changes were quikly discarded because they would not give the expected results on track. 
