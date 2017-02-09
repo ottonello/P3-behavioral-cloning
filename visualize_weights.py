@@ -54,7 +54,7 @@ def main():
 			    plt.subplot(8, 4, i+1)
 			    temp = arr_1[i]
 			    temp = cv2.resize(temp, cropped_size, cv2.INTER_AREA)
-			    plt.imshow(temp)
+			    plt.imshow(temp, cmap="gray")
 			    plt.axis('off')
 			plt.show()
 
@@ -65,7 +65,7 @@ def main():
 			    plt.subplot(6, 6, i+1)
 			    temp = arr_2[i]
 			    temp = cv2.resize(temp, cropped_size, cv2.INTER_AREA)
-			    plt.imshow(temp)
+			    plt.imshow(temp, cmap="gray")
 			    plt.axis('off')
 			plt.show()
 
@@ -74,7 +74,7 @@ def main():
 			    plt.subplot(8, 8, i+1)
 			    temp = arr_4[i]
 			    temp = cv2.resize(temp, cropped_size, cv2.INTER_AREA)
-			    plt.imshow(temp)
+			    plt.imshow(temp, cmap="gray")
 			    plt.axis('off')
 			plt.show()
 
