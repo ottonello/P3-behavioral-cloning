@@ -141,6 +141,8 @@ recover to the center of the track from these situations. These images show what
 ![alt text][image4]
 ![alt text][image5]
 
+Some samples were removed so the car was not shown when leaving the track, but only joining it instead, since we do not want to induce a bad behaviour into the model.
+
 I did NOT use data from the second track for training the final model.
 
 Some additional augmentation was performed to generate a more regular distribution of steering angle sizes.
