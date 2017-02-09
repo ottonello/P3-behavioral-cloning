@@ -58,9 +58,11 @@ and the steering angles to compensate for the training  data being skewed becaus
  After trying to add layers a bit randomly, without very good results, I decided to give a try on a well known architecture.
  I chose to try the network built by Nvidia in this very well known [paper](http://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf).
  
- The architecture of the network is the same as detailed in the paper so I won't detail it here.
-  Since we reduce the image sizes to 64x64, our network has a total of 2,116,983 params.
+ The architecture of the network is the same as detailed in the paper, except our inputs are 64x64, so 
+ our network has a total of 2,116,983 params.
  
+ ![](./img/model.png )
+
 This architecture performed very well without any further modifications.
 
 As mentioned the input data is 64x64. Other sizes were tested, especially reducing to half size from 320x160 to 160x80 but
