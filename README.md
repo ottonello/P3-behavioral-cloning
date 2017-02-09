@@ -159,7 +159,7 @@ I found that overfitting on the first track really makes driving in track 2 very
 the car is not able to drive very straight in track 1 it will perform a bit better in the second one. In the end I think
 this amount of training is about the right balance.
 
-## Activation visualization
+## Visualization of activations
 
 By taking an example from [this repository](https://github.com/windowsub0406/Behavior-Cloning/blob/master/model.ipynb) by another student,
 I decided to visualize the activation on different layers for some images, I have been curious about these visualizations
@@ -182,3 +182,18 @@ Going down to the 4th layer, now we can see more abstract features being picked 
 
 ![](./img/activation_l4.png )
 
+## Conclusions
+
+We have found it to be a very possible task to quickly train a deep convolutional neural network to
+learn to drive in a track from data points gathered by a person driving around it.
+Although this is a simulator, the conditions are very similar to what a car could possibly see in the
+real world, excluding unexpected obstacles and zero visibility conditions. 
+  
+Experimenting with different shapes and number of layers was very interesting to see the different
+ on-track behaviour of different networks after training them on the same data. It was also interesting
+ to see the effects of over and under training the network. In the first case we get a very stable behaviour
+given that the car is driving in very similar(or the same) conditions as the training data, but it
+simply doesn't know how to react in other, unknown, cases. When under-training, the performance in the
+first track degrades significantly, but the performance in other tracks improves. There is a balance
+between these two points, where the network will learn enough to drive properly under conditions same
+as in the training data, but also generalize a bit when exposed to new data.
