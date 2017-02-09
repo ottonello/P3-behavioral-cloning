@@ -178,6 +178,9 @@ on the same picture, activations are these:
 
 ![](./img/activation_l2.png )
 
+Very similar to first layer, but there is less detail now so one could say the network is generalizing
+a bit more at this point.   
+
 Going down to the 4th layer, now we can see more abstract features being picked up:
 
 ![](./img/activation_l4.png )
