@@ -158,3 +158,27 @@ of the track. I think that's pretty remarkable given that I haven't trained the 
 I found that overfitting on the first track really makes driving in track 2 very bad, and the opposite is also true. When
 the car is not able to drive very straight in track 1 it will perform a bit better in the second one. In the end I think
 this amount of training is about the right balance.
+
+## Activation visualization
+
+By taking an example from [this repository](https://github.com/windowsub0406/Behavior-Cloning/blob/master/model.ipynb) by another student,
+I decided to visualize the activation on different layers for some images, I have been curious about these visualizations
+for some time.
+
+Here are my results. For the given input:
+ 
+![](./img/activation_orig.png )
+
+Convolutional layer 1 activations look like this: 
+
+![](./img/activation_l1.png )
+
+These look already like they are focusing on different parts of the image. After layer 2,
+on the same picture, activations are these:
+
+![](./img/activation_l2.png )
+
+Going down to the 4th layer, now we can see more abstract features being picked up:
+
+![](./img/activation_l4.png )
+
